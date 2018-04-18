@@ -2,6 +2,8 @@
 #include<stdlib.h>
 #include<math.h>
 #define NodeSize 9
+#define powerSiz 1000000000
+
 
 typedef struct largeInt
 {
@@ -9,6 +11,7 @@ typedef struct largeInt
     long int len;
 
 }largeInt;
+
 
 char * stripLeadingZeros(char * str);
 int isZero(largeInt*hint);
@@ -215,7 +218,7 @@ void* intal_add(void* intal1, void* intal2)
     //printf("%ld\n",c->len);
 
     c->nums = (long long *)malloc(sizeof(long long)*c->len);
-   long long int power = pow(10,NodeSize);
+    long long int power = pow(10,NodeSize);
 
     int i,carry=0;
 
@@ -265,7 +268,7 @@ void* intal_diff(void* intal1, void* intal2)
     //printf("%ld",c->len);
 
     c->nums = (long long *)malloc(sizeof(long long)*c->len);
-   long long int power = pow(10,NodeSize);
+    long long int power = pow(10,NodeSize);
 
     int i,carry=0;
 
@@ -301,36 +304,123 @@ void* intal_diff(void* intal1, void* intal2)
     return c;
 }
 
-//void* multiIntoSingleMultiply(largeInt* a, largeInt* b) //b has to be number of length NodeSize
-//{
-//    largeInt*c = (largeInt*)malloc(sizeof(largeInt));
-//    c->len = a->len+b->len;
-//    long int carry=0;
-//    int i=0;
-//    for(i=0;i<c->len;++i)
-//    {
-//        c->nums[i] =
-//    }
-//}
+largeInt * multiSingleMultiply(largeInt*a,largeInt*b)
+{
+    largeInt * c = (largeInt*)malloc(sizeof(largeInt));
+    c->len = a->len + b->len;
+    c->nums = (long long *)malloc(sizeof(long long)*c->len);
 
-//void* intal_multiply(void* intal1, void* intal2)
-//{
-//
-//}
+    int i;
+
+    for(i=0;i<c->len;++i)
+    {
+        c->nums[i]=0;
+    }
+
+    long long int tempProds;
+
+    for(i=0;i<a->len;i++)
+    {
+        tempProds = a->nums[i] * b->nums[0];
+
+        c->nums[i]+=tempProds%powerSiz;
+        c->nums[i+1]+=tempProds/powerSiz;
+
+        //printf("\n::::%d::::%lld::::%lld::::",i,tempProds,c->nums[i]);
+    }
+
+    //printf("\ngh%d",c->len);
+
+    return c;
+}
+
+largeInt* highPart(largeInt*a,long m)  //mth position inclusive
+{
+    largeInt * c = (largeInt*)malloc(sizeof(largeInt));
+    int i;
+    if(a->len <m)
+    {
+        c->len = 1;
+        c->nums = (long long int*)malloc(sizeof(long long int));
+        c->nums[0] = 0;
+        return c;
+    }
+    else
+    {
+        c->nums = (long long int*)malloc(sizeof(long long int)*());
+        for(i=m;i<a->len;i++)
+        {
+            c->nums[i-m] = a->nums[i];
+        }
+    }
+    return c;
+}
+
+largeInt* lowPart(largeInt*a,long m)  //0th to m-1 th position including
+{
+    return NULL;
+}
 
 
+
+void* intal_multiply(void* intal1, void* intal2)
+{
+
+    largeInt*a,*b,*c;
+    a = (largeInt*) intal1;
+    b = (largeInt*) intal2;
+
+    if(isZero(a)||isZero(b))
+    {
+        c = (largeInt*)malloc(sizeof(largeInt));
+        c->len = 1;
+        c->nums = (long long int)malloc(sizeof(long long int));
+        c->nums[0] = 0;
+        return c;
+    }
+
+    if(a->len ==1)
+    {
+        //printf("\n:1:");
+        return multiSingleMultiply(b,a);
+    }
+    if(b->len ==1)
+    {
+        //printf("\n:1::");
+        return multiSingleMultiply(a,b);
+    }
+
+    //printf("\n::1::\n");
+    long int m = (a->len>b->len) ? a->len : b->len;
+    long int m2 = m/2;
+    largeInt *h1,*h2,*l1,*l2;
+
+    //printf("::2::\n");
+
+    h1 = highPart(a,m2);
+    l1 = lowPart(a,m2);
+
+    h2 = highPart(b,m2);
+    l2 = lowPart(b,m2);
+
+    return h1;
+}
 
 int main()
 {
-    char *a = "1";
-    char *b = "9999999999999999999";
+    char *a = "0";
+    char *b = "99999999999999999999999999999999999999999999999999999999999999999999999999999999";
 
     largeInt * q = (largeInt*)intal_create(b);
 
-    q = intal_add(intal_create(a),intal_create(b));
+    q = intal_diff(intal_create(a),intal_create(b));
 
     //printf("%p",q);
     //printf("\n%ld",q->len);
-    printf("%s",intal2str(q));
+    //printf("%s",intal2str(q));
+
+    largeInt * prod = intal_multiply(intal_create(b),intal_create(a));
+    printf("\n%s",intal2str((largeInt*)prod));
     //printf("%ld",q->len);
+    return 0;
 }
